@@ -35,6 +35,7 @@ export class TaskEditComponent implements OnInit {
       if (task != null) {
         this.task = task;
       } else {
+        this.alertify.error('The task does not exist');
         this.router.navigate(['']);
       }
     });

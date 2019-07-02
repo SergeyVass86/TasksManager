@@ -1,5 +1,4 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { Router } from '@angular/router';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap';
 import { Task } from 'src/app/_models/Task';
 import { TaskStatus } from 'src/app/_models/enums';
@@ -69,9 +68,10 @@ export class TaskCardComponent implements OnInit {
     this.alertify.confirm(confirmMessage, () => {
       this.taskService
         .deleteTask(this.task)
-        .subscribe(tasks =>
-          this.tasksDataService.updatedData(tasks.sort((a, b) => a.id - b.id))
-        );
+        .subscribe(tasks => {
+          this.tasksDataService.updatedData(tasks.sort((a, b) => a.id - b.id));
+          this.alertify.success('The task was deleted');
+        });
     });
   }
 }

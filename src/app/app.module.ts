@@ -2,11 +2,9 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
    BsDropdownModule,
-   ModalModule,
-   CollapseModule
+   ModalModule
  } from 'ngx-bootstrap';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -40,8 +38,6 @@ import { TasksDataPassingService } from './_services/tasks-data-passing.service'
       BrowserModule,
       AppRoutingModule,
       FormsModule,
-      BrowserAnimationsModule,
-      CollapseModule.forRoot(),
       RouterModule.forRoot(appRoutes),
       BsDropdownModule.forRoot(),
       ModalModule.forRoot()

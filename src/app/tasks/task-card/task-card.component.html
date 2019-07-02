@@ -9,22 +9,19 @@
   </div>
   <div class="card-icons-wrapper">
     <ul class="list-inline member-icons text-center">
-      <li class="list-inline-item" [routerLink]="['/tasks/', task.id]">
+      <li class="list-inline-item" [routerLink]="['/tasks/', task.id]" title="Edit task">
         <i class="fa fa-pencil"></i>
       </li>
-      <li class="list-inline-item" (click)="addSubTask()">
+      <li class="list-inline-item" (click)="addSubTask()" title="Add Subtask">
         <i class="fa fa-plus"></i>
       </li>
-      <li class="list-inline-item" (click)="deleteTask()">
+      <li class="list-inline-item" (click)="deleteTask()" title="Delete task">
         <i class="fa fa-trash"></i>
-      </li>
-      <li class="list-inline-item" *ngIf="task.subtasks != null && task.subtasks.length" (click)="isCollapsed = !isCollapsed">
-        <i class="fa fa-arrow-circle-right"></i>
       </li>
     </ul>
   </div>
 </div>
-<div class="container mt-3" id="collapseBasic" [collapse]="isCollapsed" [isAnimated]="true">
+<div class="container mt-3">
   <div class="col ml-4" *ngIf="task.subtasks != null && task.subtasks.length">
     <div *ngFor="let task of task.subtasks">
       <app-task-card [task]="task"></app-task-card>
