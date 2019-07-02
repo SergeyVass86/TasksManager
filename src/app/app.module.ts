@@ -21,6 +21,7 @@ import { StatusEnumToClassPipe } from './_pipes/statusEnumToClass.pipe';
 import { StatusEnumToIconPipe } from './_pipes/statusEnumToIcon.pipe';
 import { TaskCreateModalComponent } from './tasks/task-create-modal/task-create-modal.component';
 import { TasksDataPassingService } from './_services/tasks-data-passing.service';
+import { TaskStatisticsComponent } from './tasks/task-statistics/task-statistics.component';
 
 @NgModule({
    declarations: [
@@ -32,7 +33,8 @@ import { TasksDataPassingService } from './_services/tasks-data-passing.service'
       SplitByUpperCasePipe,
       StatusEnumToClassPipe,
       StatusEnumToIconPipe,
-      TaskCreateModalComponent
+      TaskCreateModalComponent,
+      TaskStatisticsComponent
    ],
    imports: [
       BrowserModule,
