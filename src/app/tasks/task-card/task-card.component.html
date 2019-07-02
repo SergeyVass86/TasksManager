@@ -1,7 +1,33 @@
-<div class="card text-white bg-primary mb-3" style="max-width: 20rem;">
-  <div class="card-header">{{task.title}}</div>
+<div class="card mb-3 {{ task.status | statusEnumToClass }}">
+  <div class="card-header">
+    <i class="fa {{ task.status | statusEnumToIcon }}"></i>
+    {{ statuses[task.status] | splitByUpperCase }}
+  </div>
   <div class="card-body">
-    <h4 class="card-title">{{task.status}}</h4>
-    <p class="card-text">{{task.description}}</p>
+    <h4 class="card-title">{{ task.title }}</h4>
+    <p class="card-text">{{ task.description }}</p>
+  </div>
+  <div class="card-icons-wrapper">
+    <ul class="list-inline member-icons text-center">
+      <li class="list-inline-item" [routerLink]="['/tasks/', task.id]">
+        <i class="fa fa-pencil"></i>
+      </li>
+      <li class="list-inline-item" (click)="addSubTask()">
+        <i class="fa fa-plus"></i>
+      </li>
+      <li class="list-inline-item" (click)="deleteTask()">
+        <i class="fa fa-trash"></i>
+      </li>
+      <li class="list-inline-item" *ngIf="task.subtasks != null && task.subtasks.length" (click)="isCollapsed = !isCollapsed">
+        <i class="fa fa-arrow-circle-right"></i>
+      </li>
+    </ul>
+  </div>
+</div>
+<div class="container mt-3" id="collapseBasic" [collapse]="isCollapsed" [isAnimated]="true">
+  <div class="col ml-4" *ngIf="task.subtasks != null && task.subtasks.length">
+    <div *ngFor="let task of task.subtasks">
+      <app-task-card [task]="task"></app-task-card>
+    </div>
   </div>
 </div>

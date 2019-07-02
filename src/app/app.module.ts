@@ -2,9 +2,11 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {
    BsDropdownModule,
-   ModalModule
+   ModalModule,
+   CollapseModule
  } from 'ngx-bootstrap';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -17,6 +19,10 @@ import { TaskEditComponent } from './tasks/task-edit/task-edit.component';
 import { TaskService } from './_services/task.service';
 import { AlertifyService } from './_services/alertify.service';
 import { SplitByUpperCasePipe } from './_pipes/splitByUpperCase.pipe';
+import { StatusEnumToClassPipe } from './_pipes/statusEnumToClass.pipe';
+import { StatusEnumToIconPipe } from './_pipes/statusEnumToIcon.pipe';
+import { TaskCreateModalComponent } from './tasks/task-create-modal/task-create-modal.component';
+import { TasksDataPassingService } from './_services/tasks-data-passing.service';
 
 @NgModule({
    declarations: [
@@ -25,20 +31,27 @@ import { SplitByUpperCasePipe } from './_pipes/splitByUpperCase.pipe';
       TaskListComponent,
       TaskCardComponent,
       TaskEditComponent,
-      SplitByUpperCasePipe
+      SplitByUpperCasePipe,
+      StatusEnumToClassPipe,
+      StatusEnumToIconPipe,
+      TaskCreateModalComponent
    ],
    imports: [
       BrowserModule,
       AppRoutingModule,
       FormsModule,
+      BrowserAnimationsModule,
+      CollapseModule.forRoot(),
       RouterModule.forRoot(appRoutes),
       BsDropdownModule.forRoot(),
       ModalModule.forRoot()
    ],
    providers: [
       TaskService,
-      AlertifyService
+      AlertifyService,
+      TasksDataPassingService
    ],
+   entryComponents: [TaskCreateModalComponent],
    bootstrap: [
       AppComponent
    ]

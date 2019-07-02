@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
 import { TaskService } from 'src/app/_services/task.service';
 import { Task } from 'src/app/_models/task';
-import { AlertifyService } from 'src/app/_services/alertify.service';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap';
+import { TasksDataPassingService } from 'src/app/_services/tasks-data-passing.service';
 
 @Component({
   selector: 'app-task-list',
@@ -12,31 +11,18 @@ import { AlertifyService } from 'src/app/_services/alertify.service';
 })
 export class TaskListComponent implements OnInit {
   tasks: Task[];
+  bsModalRef: BsModalRef;
 
   constructor(
     private taskService: TaskService,
-    private alertify: AlertifyService,
-    private route: ActivatedRoute
+    private tasksDataService: TasksDataPassingService
   ) {}
 
   ngOnInit() {
-    this.taskService.getTasks().subscribe(tasks => (this.tasks = tasks));
-  }
+    this.tasksDataService.currentMessage.subscribe(data => (this.tasks = data));
 
-  addTask() {
-    let counter = 0;
-    if (localStorage.getItem('counter')) {
-      counter = +localStorage.getItem('counter');
-    }
-    const task: Task = {
-      id: counter++,
-      title: 'new task',
-      description: 'some description',
-      status: 'some status'
-    };
-    this.taskService.addTask(task).subscribe(tasks => {
-      localStorage.setItem('counter', counter.toString());
-      this.tasks = tasks;
-    });
+    this.taskService
+      .getTasks()
+      .subscribe(tasks => (this.tasks = tasks.sort((a, b) => a.id - b.id)));
   }
 }

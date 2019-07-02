@@ -14,12 +14,12 @@
     <select
         class="form-control ml-1"
         style="width: 130px"
-        id="gender"
+        id="status"
         [(ngModel)]="task.status"
-        name="gender"
+        name="status"
       >
-        <option *ngFor="let status of statuses" [value]="status">
-          {{ status | splitByUpperCase }}
+        <option *ngFor="let status of statuses" [value]="status.value">
+          {{ status.display | splitByUpperCase }}
         </option>
       </select>
     <h4>Description</h4>
