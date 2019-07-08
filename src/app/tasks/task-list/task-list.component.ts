@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { TaskService } from 'src/app/_services/task.service';
 import { Task } from 'src/app/_models/task';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap';
-import { TasksDataPassingService } from 'src/app/_services/tasks-data-passing.service';
 
 @Component({
   selector: 'app-task-list',
@@ -14,12 +13,11 @@ export class TaskListComponent implements OnInit {
   bsModalRef: BsModalRef;
 
   constructor(
-    private taskService: TaskService,
-    private tasksDataService: TasksDataPassingService
+    private taskService: TaskService
   ) {}
 
   ngOnInit() {
-    this.tasksDataService.currentMessage.subscribe(data => (this.tasks = data));
+    this.taskService.currentMessage.subscribe(data => (this.tasks = data));
 
     this.taskService
       .getTasks()

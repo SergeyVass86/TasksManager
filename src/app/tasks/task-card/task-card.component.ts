@@ -4,7 +4,6 @@ import { Task } from 'src/app/_models/Task';
 import { TaskStatus } from 'src/app/_models/enums';
 import { TaskCreateModalComponent } from '../task-create-modal/task-create-modal.component';
 import { TaskService } from 'src/app/_services/task.service';
-import { TasksDataPassingService } from 'src/app/_services/tasks-data-passing.service';
 import { AlertifyService } from 'src/app/_services/alertify.service';
 
 @Component({
@@ -21,7 +20,6 @@ export class TaskCardComponent implements OnInit {
   constructor(
     private taskService: TaskService,
     private modalService: BsModalService,
-    private tasksDataService: TasksDataPassingService,
     private alertify: AlertifyService
   ) {}
 
@@ -31,12 +29,8 @@ export class TaskCardComponent implements OnInit {
   }
 
   addSubTask() {
-    let counter = 0;
-    if (localStorage.getItem('counter')) {
-      counter = +localStorage.getItem('counter');
-    }
-    const taskToCreate = {
-      id: counter++,
+    const taskToCreate: Task = {
+      id: 0,
       title: '',
       description: '',
       status: 0,
@@ -50,9 +44,8 @@ export class TaskCardComponent implements OnInit {
     });
     this.bsModalRef.content.createNewTask.subscribe((newTask: Task) => {
       if (newTask.title !== '') {
-        this.taskService.addTask(newTask).subscribe(tasks => {
-          localStorage.setItem('counter', counter.toString());
-          this.tasksDataService.updatedData(tasks.sort((a, b) => a.id - b.id));
+        this.taskService.addTask(newTask).subscribe(() => {
+          this.alertify.success('Subtask added successfully');
         });
       }
     });
@@ -62,16 +55,13 @@ export class TaskCardComponent implements OnInit {
     let confirmMessage = 'Are you sure you want to delete this task?';
     if (this.task.subtasks != null && this.task.subtasks.length) {
       confirmMessage += ` Warning: this task has ${
-        this.task.subtasks.length
+        this.taskService.flattenDeep(this.task.subtasks).length
       } subtasks`;
     }
     this.alertify.confirm(confirmMessage, () => {
-      this.taskService
-        .deleteTask(this.task)
-        .subscribe(tasks => {
-          this.tasksDataService.updatedData(tasks.sort((a, b) => a.id - b.id));
-          this.alertify.success('The task was deleted');
-        });
+      this.taskService.deleteTask(this.task).subscribe(() => {
+        this.alertify.success('The task was deleted');
+      });
     });
   }
 }

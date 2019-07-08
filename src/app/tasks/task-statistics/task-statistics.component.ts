@@ -20,7 +20,7 @@ export class TaskStatisticsComponent implements OnInit {
 
   loadData() {
     this.taskService.getTasks().subscribe(tasks => {
-      const flatTasks = this.flattenDeep(tasks);
+      const flatTasks = this.taskService.flattenDeep(tasks);
       this.barChart = new Chart('barChart', {
         type: 'bar',
         data: {
@@ -65,15 +65,5 @@ export class TaskStatisticsComponent implements OnInit {
         }
       });
     });
-  }
-
-  private flattenDeep(arr1: Task[]) {
-    return arr1.reduce(
-      (acc, val) =>
-        Array.isArray(val.subtasks)
-          ? acc.concat(val).concat(this.flattenDeep(val.subtasks))
-          : acc.concat(val),
-      []
-    );
   }
 }

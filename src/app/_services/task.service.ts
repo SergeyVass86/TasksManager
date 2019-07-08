@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { Task } from '../_models/Task';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
+  private messageService = new BehaviorSubject<Task[]>([]);
+  currentMessage = this.messageService.asObservable();
+
   constructor() {}
 
   getTasks(): Observable<Task[]> {
@@ -19,38 +22,60 @@ export class TaskService {
   }
 
   addTask(task: Task): Observable<Task[]> {
-    let tasks = this.getTasksFromLocalStorage();
-    if (task.parentId) {
-      tasks = this.updateParentTasks(task, tasks);
+    let counter = this.getCounter();
+    task.id = counter++;
+    const tasks = this.getTasksFromLocalStorage();
+    if (task.parentId != null) {
+      const parentTask = this.findTask(task.parentId, tasks);
+      this.addTaskToParent(task, parentTask);
     } else {
       tasks.push(task);
     }
     localStorage.setItem('tasks', JSON.stringify(tasks));
-    return new Observable(observer => observer.next(tasks));
+    this.updateCounter(counter);
+    this.updatedData(tasks);
+    return new Observable();
   }
 
   updateTask(task: Task): Observable<Task[]> {
-    let tasks = this.getTasksFromLocalStorage();
+    const tasks = this.getTasksFromLocalStorage();
     if (task.parentId == null) {
       const originalTask = tasks.filter(t => t.id === task.id)[0];
       tasks[tasks.indexOf(originalTask)] = task;
     } else {
-      tasks = this.updateParentTasks(task, tasks);
+      const parentTask = this.findTask(task.parentId, tasks);
+      this.updateParentTask(task, parentTask);
     }
     localStorage.setItem('tasks', JSON.stringify(tasks));
     return new Observable(observer => observer.next(tasks));
   }
 
   deleteTask(task: Task): Observable<Task[]> {
-    let tasks = this.getTasksFromLocalStorage();
+    const tasks = this.getTasksFromLocalStorage();
     if (task.parentId == null) {
       const originalTask = tasks.filter(t => t.id === task.id)[0];
       tasks.splice(tasks.indexOf(originalTask), 1);
     } else {
-      tasks = this.deleteParentTask(task, tasks);
+      const parentTask = this.findTask(task.parentId, tasks);
+      this.deleteParentSubtask(task, parentTask);
     }
     localStorage.setItem('tasks', JSON.stringify(tasks));
-    return new Observable(observer => observer.next(tasks));
+    this.updatedData(tasks);
+    return new Observable();
+  }
+
+  updatedData(data: Task[]) {
+    this.messageService.next(data);
+  }
+
+  flattenDeep(tasks: Task[]): Task[] {
+    return tasks.reduce(
+      (acc, val) =>
+        Array.isArray(val.subtasks)
+          ? acc.concat(val).concat(this.flattenDeep(val.subtasks))
+          : acc.concat(val),
+      []
+    );
   }
 
   private getTasksFromLocalStorage(): Task[] {
@@ -77,75 +102,32 @@ export class TaskService {
     return task;
   }
 
-  private updateParentTasks(task: Task, tasks: Task[]): Task[] {
-    let parentId = task.parentId;
-    let taskToInsert = task;
-    let currentTasksArray = tasks;
-    while (parentId) {
-      const parentTask = this.findTask(parentId, tasks);
-      if (parentTask.parentId) {
-        currentTasksArray = this.findTask(parentTask.parentId, tasks).subtasks;
-      } else {
-        currentTasksArray = tasks;
-      }
-      if (
-        currentTasksArray[currentTasksArray.indexOf(parentTask)].subtasks ==
-        null
-      ) {
-        currentTasksArray[currentTasksArray.indexOf(parentTask)].subtasks = [];
-      }
-      if (parentTask.subtasks.filter(t => t.id === taskToInsert.id).length) {
-        const originalTask = parentTask.subtasks.filter(
-          t => t.id === taskToInsert.id
-        )[0];
-        currentTasksArray[currentTasksArray.indexOf(parentTask)].subtasks[
-          currentTasksArray[
-            currentTasksArray.indexOf(parentTask)
-          ].subtasks.indexOf(originalTask)
-        ] = taskToInsert;
-      } else {
-        currentTasksArray[currentTasksArray.indexOf(parentTask)].subtasks.push(
-          taskToInsert
-        );
-      }
-      taskToInsert = parentTask;
-      parentId = parentTask.parentId;
+  private addTaskToParent(task: Task, parentTask: Task) {
+    if (parentTask.subtasks == null) {
+      parentTask.subtasks = [];
     }
-    return currentTasksArray;
+    parentTask.subtasks.push(task);
   }
 
-  private deleteParentTask(task: Task, tasks: Task[]) {
-    let parentId = task.parentId;
-    let currentTasksArray = tasks;
-    while (parentId) {
-      const parentTask = this.findTask(parentId, tasks);
-      if (parentTask.parentId) {
-        currentTasksArray = this.findTask(parentTask.parentId, tasks).subtasks;
-      } else {
-        currentTasksArray = tasks;
-      }
-      if (
-        currentTasksArray[currentTasksArray.indexOf(parentTask)].subtasks ==
-        null
-      ) {
-        currentTasksArray[currentTasksArray.indexOf(parentTask)].subtasks = [];
-      }
-      if (parentTask.subtasks.filter(t => t.id === task.id).length) {
-        const originalTask = parentTask.subtasks.filter(
-          t => t.id === task.id
-        )[0];
-        currentTasksArray[
-          currentTasksArray.indexOf(parentTask)
-        ].subtasks.splice(
-          currentTasksArray[
-            currentTasksArray.indexOf(parentTask)
-          ].subtasks.indexOf(originalTask),
-          1
-        );
-      }
-      currentTasksArray[currentTasksArray.indexOf(parentTask)] = parentTask;
-      parentId = parentTask.parentId;
+  private updateParentTask(task: Task, parentTask: Task) {
+    const originalTask = parentTask.subtasks.filter(t => t.id === task.id)[0];
+    parentTask.subtasks[parentTask.subtasks.indexOf(originalTask)] = task;
+  }
+
+  private deleteParentSubtask(task: Task, parentTask: Task) {
+    const originalTask = parentTask.subtasks.filter(t => t.id === task.id)[0];
+    parentTask.subtasks.splice(parentTask.subtasks.indexOf(originalTask), 1);
+  }
+
+  private getCounter(): number {
+    let counter = 0;
+    if (localStorage.getItem('counter')) {
+      counter = +localStorage.getItem('counter');
     }
-    return currentTasksArray;
+    return counter;
+  }
+
+  private updateCounter(counter: number) {
+    localStorage.setItem('counter', counter.toString());
   }
 }
